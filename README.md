@@ -1,2 +1,2 @@
 # BattleMagick
-BattleMagick! is a new concept game in new development
+BattleMagick! is a concept game in early development
