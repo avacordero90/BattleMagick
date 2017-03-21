@@ -1,0 +1,78 @@
+html {
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background: black;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.06);
+    color: orange;
+    font-family: fantasy;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: orange;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center
+}
+
+a {
+    color: orange;
+}
+
+b, strong, li {
+    font-weight: 600;
+}
+
+samp {
+    display: none;
+}
+
+img {
+    animation: colorize 2s cubic-bezier(0, 0, .78, .36) 1;
+    background: transparent;
+    border-radius: 4px;
+    display: block;
+}
+
+@keyframes colorize {
+    0% {
+        -webkit-filter: grayscale(100%);
+        filter: grayscale(100%);
+    }
+    100% {
+        -webkit-filter: grayscale(0%);
+        filter: grayscale(0%);
+    }
+}
+
+#banner {
+    border: 0;
+    top: 0;
+    background: rgba(12, 140, 89, 0.6); 
+    display: block;
+    z-index: 3;
+    position: absolute;
+    width: 100%;
+    height:5em;
+}
+
+#banner-header {
+    display: block;
+    z-index: 5;
+    position: absolute;
+    width: 20em;
+    height:5em;
+    top:0;
+}
+
+#main {
+    position:relative;
+    top:5em;
+    background-color: black;
+    margin: 0 auto;
+    max-width: 95%;
+}
+

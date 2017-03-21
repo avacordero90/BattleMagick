@@ -1,0 +1,41 @@
+<h1>Workout Table Results:</h1>
+<fieldset>
+	  <form id="postForm" action="/insert" method="get">
+      	Name: <input type="text" name="name" id="qName">
+      	Reps: <input type="text" name="reps" id="qReps">
+      	Weight: <input type="text" name="weight" id="qWeight">
+      	lbs: <input type="radio" name="lbs" id="qLbs" value="1"> kgs: <input type="radio" name="lbs" id="qKgs" value="0">
+      	Date: <input type="text" name="date" id="qDate">
+      	<input type="submit" value="Add to table" id="insert">
+    </form><br>
+    <form id="resetTable" action="/reset-table">
+    	<input type="submit" value="Reset table" id="reset">
+    </form>
+</fieldset>
+<h3>{{message}}</h3>
+<table id="workoutTable">
+	<thead>
+		<tr>
+			<th>Workout Name</th>
+			<th>Reps</th>
+			<th>Weight</th>
+			<th>Lbs?</th>
+			<th>Date</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{{#each results}}
+		<tr>
+			<td>{{name}}</td>
+			<td>{{reps}}</td>
+			<td>{{weight}}</td>
+			<td>{{lbs}}</td>
+			<td>{{date}}</td>
+			<td><form action="/edit" method="get"><input type="hidden" name="id" value="{{id}}"><input type="submit" value="Edit" id="edit"></form></td>
+			<td><form action="/delete" method="get"><input type="hidden" name="id" value="{{id}}"><input type="submit" value="Delete" id="delete"></form></td>
+		</tr>
+		{{/each}}
+	</tbody>
+</table>
