@@ -12,36 +12,35 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 app.set('port', 3398);
 
-function query(ent) {
-    mysql.pool.query('SELECT * FROM '+ent, function(err, rows, fields){
-        if(err){
-            next(err);
-            return;
-        }
-        context.results = rows;
-        res.render('home', context);
-    });
-}
-
 //go to root of site, display tables.
 app.get('/', function(req, res, next){
 	var context = {};
-    query('wizard');
+	mysql.pool.query('SELECT * FROM wizard', function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+		context.results = rows;
+		res.render('home', context);
+	});
 });
 
 app.get('/insert',function(req,res,next){
     var context = {};
-    try {
         mysql.pool.query("INSERT INTO wizard (`name`,`special`,`life`,`magick`) VALUES ((?),(?),(?),(?))", [req.query.name, req.query.special, req.query.life, req.query.magick], function(err, result){
             if(err){
                 next(err);
                 return;
             }
-            query('wizard');
+        mysql.pool.query('SELECT * FROM wizard', function(err, rows, fields){
+		if(err){
+			next(err);
+			return;
+		}
+		context.results = rows;
+		res.render('home', context);
+	});
         });
-    } catch (err) {
-        console.log("Insertion failed.");
-    };
 });
 
 app.get('/delete',function(req,res,next){
@@ -50,21 +49,19 @@ app.get('/delete',function(req,res,next){
     if(err){
       next(err);
       return;
+    }	
+    mysql.pool.query('SELECT * FROM wizard', function(err, rows, fields){
+    if(err){
+        next(err);
+        return;
     }
-    context.results = "Deleted " + result.changedRows + " rows.";
-    res.render('home',context);
+    context.results = rows;
+    res.render('home', context);
+	});
   });
 });
 
 app.get('/update',function(req,res,next){
-  var context = {};
-  mysql.pool.query("SELECT * FROM wizard WHERE `id`=(?)", [req.query.id], function(err, result){
-    if(err){
-      next(err);
-      return;
-    }
-    if(result.length == 1){
-      var curVals = result[0];
       mysql.pool.query("UPDATE wizard SET `name`=(?), `special`=(?), `life`=(?), `magick`=(?) WHERE `id`=(?)",
         [req.query.name || curVals.name, req.query.special || curVals.special, req.query.life || curVals.life, req.query.magick || curVals.magick, req.query.id],
         function(err, result){
@@ -75,9 +72,32 @@ app.get('/update',function(req,res,next){
         context.results = "Updated " + result.changedRows + " rows.";
         res.render('home',context);
       });
-    }
-  });
 });
+
+
+//
+//app.get('/update',function(req,res,next){
+//  var context = {};
+//  mysql.pool.query("SELECT * FROM wizard WHERE `id`=(?)", [req.query.id], function(err, result){
+//    if(err){
+//      next(err);
+//      return;
+//    }
+//    if(result.length == 1){
+//      var curVals = result[0];
+//      mysql.pool.query("UPDATE wizard SET `name`=(?), `special`=(?), `life`=(?), `magick`=(?) WHERE `id`=(?)",
+//        [req.query.name || curVals.name, req.query.special || curVals.special, req.query.life || curVals.life, req.query.magick || curVals.magick, req.query.id],
+//        function(err, result){
+//        if(err){
+//          next(err);
+//          return;
+//        }
+//        context.results = "Updated " + result.changedRows + " rows.";
+//        res.render('home',context);
+//      });
+//    }
+//  });
+//});
 
 //never do this in real-life -- just a shortcut for this class.
 app.get('/reset-table',function(req,res,next){

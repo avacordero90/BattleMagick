@@ -40,8 +40,26 @@ img {
 .game_chest {
     padding: 0 3% 0 3%;
 /*    border-style: inset;*/
-    width: 40%;
-/*    min-width: 40%;*/
+/*    width: 40%;*/
+    min-width: 10%;
+    max-width: 30%;
+}
+
+thead {
+    width:100%;
+}
+
+DIV.table 
+{
+    display:table;
+}
+FORM.tr, DIV.tr
+{
+    display:table-row;
+}
+SPAN.td
+{
+    display:table-cell;
 }
 
 @keyframes colorize {
@@ -86,4 +104,9 @@ img {
 
 #game_chest.fieldset {
     width=100%;
+}
+
+#wizForm {
+    width:100%;
+    
 }
