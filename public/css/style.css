@@ -37,6 +37,13 @@ img {
     display: block;
 }
 
+.game_chest {
+    padding: 0 3% 0 3%;
+/*    border-style: inset;*/
+    width: 40%;
+/*    min-width: 40%;*/
+}
+
 @keyframes colorize {
     0% {
         -webkit-filter: grayscale(100%);
@@ -76,3 +83,7 @@ img {
     max-width: 95%;
 }
 
+
+#game_chest.fieldset {
+    width=100%;
+}

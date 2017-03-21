@@ -1,3 +1,5 @@
+
 dbcon.js
-admin-update.js
-schema.sql
+node_modules/
+package.json 
+

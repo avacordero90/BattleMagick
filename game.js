@@ -1,40 +1,52 @@
 var express = require('express');
 var mysql = require('./dbcon.js');
-
 var app = express();
 var handlebars = require('express-handlebars').create({defaultLayout:'main'});
+var bodyParser = require('body-parser');
 
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+app.use(express.static('public'));
+//app.use(session({secret:'###'}));
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 app.set('port', 3398);
 
-app.get('/',function(req,res,next){
-  var context = {};
-  mysql.pool.query('SELECT * FROM todo', function(err, rows, fields){
-    if(err){
-      next(err);
-      return;
-    }
-    context.results = JSON.stringify(rows);
-    res.render('home', context);
-  });
+function query(ent) {
+    mysql.pool.query('SELECT * FROM '+ent, function(err, rows, fields){
+        if(err){
+            next(err);
+            return;
+        }
+        context.results = rows;
+        res.render('home', context);
+    });
+}
+
+//go to root of site, display tables.
+app.get('/', function(req, res, next){
+	var context = {};
+    query('wizard');
 });
 
 app.get('/insert',function(req,res,next){
-  var context = {};
-  mysql.pool.query("INSERT INTO todo (`name`) VALUES (?)", [req.query.c], function(err, result){
-    if(err){
-      next(err);
-      return;
-    }
-    context.results = "Inserted id " + result.insertId;
-    res.render('home',context);
-  });
+    var context = {};
+    try {
+        mysql.pool.query("INSERT INTO wizard (`name`,`special`,`life`,`magick`) VALUES ((?),(?),(?),(?))", [req.query.name, req.query.special, req.query.life, req.query.magick], function(err, result){
+            if(err){
+                next(err);
+                return;
+            }
+            query('wizard');
+        });
+    } catch (err) {
+        console.log("Insertion failed.");
+    };
 });
 
 app.get('/delete',function(req,res,next){
   var context = {};
-  mysql.pool.query("DELETE FROM todo WHERE id=?", [req.query.id], function(err, result){
+  mysql.pool.query("DELETE FROM wizard WHERE `id`=(?)", [req.query.id], function(err, result){
     if(err){
       next(err);
       return;
@@ -44,34 +56,17 @@ app.get('/delete',function(req,res,next){
   });
 });
 
-
-///simple-update?id=2&name=The+Task&done=false&due=2015-12-5
-app.get('/simple-update',function(req,res,next){
+app.get('/update',function(req,res,next){
   var context = {};
-  mysql.pool.query("UPDATE todo SET name=?, done=?, due=? WHERE id=? ",
-    [req.query.name, req.query.done, req.query.due, req.query.id],
-    function(err, result){
-    if(err){
-      next(err);
-      return;
-    }
-    context.results = "Updated " + result.changedRows + " rows.";
-    res.render('home',context);
-  });
-});
-
-///safe-update?id=1&name=The+Task&done=false
-app.get('/safe-update',function(req,res,next){
-  var context = {};
-  mysql.pool.query("SELECT * FROM todo WHERE id=?", [req.query.id], function(err, result){
+  mysql.pool.query("SELECT * FROM wizard WHERE `id`=(?)", [req.query.id], function(err, result){
     if(err){
       next(err);
       return;
     }
     if(result.length == 1){
       var curVals = result[0];
-      mysql.pool.query("UPDATE todo SET name=?, done=?, due=? WHERE id=? ",
-        [req.query.name || curVals.name, req.query.done || curVals.done, req.query.due || curVals.due, req.query.id],
+      mysql.pool.query("UPDATE wizard SET `name`=(?), `special`=(?), `life`=(?), `magick`=(?) WHERE `id`=(?)",
+        [req.query.name || curVals.name, req.query.special || curVals.special, req.query.life || curVals.life, req.query.magick || curVals.magick, req.query.id],
         function(err, result){
         if(err){
           next(err);
@@ -84,14 +79,19 @@ app.get('/safe-update',function(req,res,next){
   });
 });
 
+//never do this in real-life -- just a shortcut for this class.
 app.get('/reset-table',function(req,res,next){
   var context = {};
-  mysql.pool.query("DROP TABLE IF EXISTS todo", function(err){
-    var createString = "CREATE TABLE todo(" +
-    "id INT PRIMARY KEY AUTO_INCREMENT," +
-    "name VARCHAR(255) NOT NULL," +
-    "done BOOLEAN," +
-    "due DATE)";
+  mysql.pool.query("DROP TABLE IF EXISTS wizard", function(err){
+    var createString = "CREATE TABLE `wizard` ("+
+  "`id` int(11) NOT NULL AUTO_INCREMENT,"+
+  "`name` varchar(30) NOT NULL,"+
+  "`special` int(11) NOT NULL,"+
+  "`life` varchar(255) NOT NULL,"+
+  "`magick` varchar(255) NOT NULL,"+
+  "PRIMARY KEY (`id`),"+
+  "UNIQUE KEY `name` (`name`)"+
+") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
     mysql.pool.query(createString, function(err){
       context.results = "Table reset";
       res.render('home',context);
