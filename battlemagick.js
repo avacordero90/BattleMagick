@@ -7,23 +7,39 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static('public'));
-//app.use(session({secret:'###'}));
+
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 app.set('port', 3398);
 
-//go to root of site, display tables.
-app.get('/', function(req, res, next){
-	var context = {};
-	mysql.pool.query('SELECT * FROM wizard', function(err, rows, fields){
-		if(err){
-			next(err);
-			return;
-		}
-		context.results = rows;
-		res.render('home', context);
-	});
-});
+function showtable(table){
+    try {
+        return function(req, res, next){
+            var context = {};
+            mysql.pool.query('SELECT * FROM '+table, function(err, rows, fields){
+                if(err){
+                    next(err);
+                    return;
+                }
+                context.fields = fields;
+                context.results = rows;
+                context.table = table;
+                res.render('table', context);
+            });
+        };
+    } catch(e) { res.render('home', context); console.log(e); throw e;
+    } finally { console.log("Render failed.") }
+}
+
+app.get('/',function(req, res, next){
+    var context = {};
+        res.render('home', context);
+    });
+
+app.get('/wizards',showtable('wizard'));
+app.get('/spells',showtable('spell'));
+app.get('/creatures',showtable('creature'));
+app.get('/potions',showtable('potion'));
 
 app.get('/insert',function(req,res,next){
     var context = {};
@@ -38,7 +54,7 @@ app.get('/insert',function(req,res,next){
 			return;
 		}
 		context.results = rows;
-		res.render('home', context);
+		res.render('table', context);
 	});
         });
 });
@@ -56,12 +72,20 @@ app.get('/delete',function(req,res,next){
         return;
     }
     context.results = rows;
-    res.render('home', context);
+    res.render('table', context);
 	});
   });
 });
 
 app.get('/update',function(req,res,next){
+  var context = {};
+  mysql.pool.query("SELECT * FROM wizard WHERE `id`=(?)", [req.query.id], function(err, result){
+    if(err){
+      next(err);
+      return;
+    }
+    if(result.length == 1){
+      var curVals = result[0];
       mysql.pool.query("UPDATE wizard SET `name`=(?), `special`=(?), `life`=(?), `magick`=(?) WHERE `id`=(?)",
         [req.query.name || curVals.name, req.query.special || curVals.special, req.query.life || curVals.life, req.query.magick || curVals.magick, req.query.id],
         function(err, result){
@@ -70,54 +94,12 @@ app.get('/update',function(req,res,next){
           return;
         }
         context.results = "Updated " + result.changedRows + " rows.";
-        res.render('home',context);
+        res.render('table',context);
       });
-});
-
-
-//
-//app.get('/update',function(req,res,next){
-//  var context = {};
-//  mysql.pool.query("SELECT * FROM wizard WHERE `id`=(?)", [req.query.id], function(err, result){
-//    if(err){
-//      next(err);
-//      return;
-//    }
-//    if(result.length == 1){
-//      var curVals = result[0];
-//      mysql.pool.query("UPDATE wizard SET `name`=(?), `special`=(?), `life`=(?), `magick`=(?) WHERE `id`=(?)",
-//        [req.query.name || curVals.name, req.query.special || curVals.special, req.query.life || curVals.life, req.query.magick || curVals.magick, req.query.id],
-//        function(err, result){
-//        if(err){
-//          next(err);
-//          return;
-//        }
-//        context.results = "Updated " + result.changedRows + " rows.";
-//        res.render('home',context);
-//      });
-//    }
-//  });
-//});
-
-//never do this in real-life -- just a shortcut for this class.
-app.get('/reset-table',function(req,res,next){
-  var context = {};
-  mysql.pool.query("DROP TABLE IF EXISTS wizard", function(err){
-    var createString = "CREATE TABLE `wizard` ("+
-  "`id` int(11) NOT NULL AUTO_INCREMENT,"+
-  "`name` varchar(30) NOT NULL,"+
-  "`special` int(11) NOT NULL,"+
-  "`life` varchar(255) NOT NULL,"+
-  "`magick` varchar(255) NOT NULL,"+
-  "PRIMARY KEY (`id`),"+
-  "UNIQUE KEY `name` (`name`)"+
-") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-    mysql.pool.query(createString, function(err){
-      context.results = "Table reset";
-      res.render('home',context);
-    })
+    }
   });
 });
+
 
 app.use(function(req,res){
   res.status(404);
