@@ -1,43 +1,44 @@
 <h3>{{message}}</h3>
 
-    <p><b>General Use Queries (30%)</b>all queries that will be used to select, update, add or delete data. Because many of these will be based on user input, use square brackets to act as place holders for variables that will be user provided. For example, if I were going to query based on employee salaries, I might have a query like this: 
-    SELECT salary FROM employee WHERE salary > [salaryInput ]; Another example - INSERT INTO employee(name, age) VALUES ([user],[name]);<br></p>
-
 <div  class="game_chest">
-<fieldset>
+<fieldset class="entity" id ="{{table}}">
     
-<legend><h2>{{table}}</h2></legend><form id="wizForm" method="get">
+<legend><h2>{{table}}</h2></legend>
+<form id="wizForm" method="post">
     <thead><tr>
         {{#each fields}}
             {{this.name}}: <th><input type="text" name="{{this.name}}" id="{{this.name}}"></th>
         {{/each}}
-        
+        <input type="hidden" name="table" id="table" value="{{table}}">
         <th><button type="submit" formaction="/insert" value="insert">Insert</button></th>
-        </tr></thead><br><br>
-    </form>
+    </tr></thead><br><br>
+</form>
     <!-- all your inputs -->
-    
-<div class="table">
-    <form class="tr" method="get" action="/update">
-    <span><table class="data_table">
-    <thead><tr>
-        {{#each fields}} <th>{{this.orgName}}</th> {{/each}}
-    </tr></thead>
-    <tbody>
-        {{#each results}}<tr>
-        {{#each this}}
-            <td><span class="td"><input type="text" value="{{this}}"/></span></td>
-        {{/each}}
-            <td><form action="/update" method="get"><input type="hidden" name="id" value="{{id}}"><input type="submit" value="Update" id="update"></form></td>
-        
-            <td><button type="submit" formaction="/update" value="update" type="hidden" name="id" value="{{id}}">Update</button></td>
 
-            <td><form action="/delete" method="get"><input type="hidden" name="id" value="{{id}}"><input type="submit" value="Delete" id="delete"></form></td>
-        
-        </tr>{{/each}}
-    </tbody>
-    </table></span>
-    </form>
-    </div>
-    </fieldset>
+<div class="table">
+<form class="tr" method="post" action="/update">
+<span><table>
+<thead><tr>
+{{#each fields}} <th>{{this.orgName}}</th> {{/each}}
+</tr></thead>
+<tbody>
+{{#each results}}<tr>
+{{#each this}}
+<td><span class="td"><input type="text" value="{{this}}"/></span></td>
+{{/each}}
+    <td><form action="/delete" method="post">
+        <input type="hidden" name="id" value="{{id}}">
+        <input type="hidden" class="table_value" name="table">
+        <input type="submit" value="Delete" id="delete">
+    </form></td>
+</tr>{{/each}}     
+</tbody>
+</table></span>
+</form>
 </div>
+</fieldset>
+</div>
+ <script>
+    tab_vals = document.getElementsByClassName("table_value")
+    Array.prototype.forEach.call(tab_vals,function(tab_val) {tab_val.setAttribute("value","{{table}}")});
+     </script>

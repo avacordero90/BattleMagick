@@ -137,10 +137,9 @@ SPAN.td
   padding: 1rem;
   text-align: center;
 } 
-li {
+#footer li {
     float:none;
     display: inline;
-    color: white;
     text-align:center;
     text-decoration: none;
 }
